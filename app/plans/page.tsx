@@ -1,0 +1,6 @@
+import Link from "next/link";
+import { plans } from "../../lib/phase1";
+
+export default function PlansPage() {
+  return <main className="directory-page plans-page"><nav className="detail-nav"><Link className="logo" href="/"><span className="logo-mark">N</span><span>northstar<span className="logo-dot">.</span></span></Link><Link className="back-link" href="/dashboard">← Dashboard</Link></nav><header className="directory-hero"><span className="kicker">PREMIUM PRACTICE</span><h1>Choose the pace<br /><em>that fits you.</em></h1><p>Start free, then unlock the practice depth you need when you are ready.</p></header><section className="directory-content"><div className="plan-grid">{plans.map((plan) => <article className={`plan-card ${plan.id === "bpsc-complete" ? "featured-plan" : ""}`} key={plan.id}>{plan.badge && <span className="plan-badge">{plan.badge}</span>}<span className="kicker">{plan.validity.toUpperCase()}</span><h2>{plan.name}</h2><p>{plan.description}</p><strong className="plan-price">{plan.price}</strong><span className="plan-validity">{plan.validity}</span><ul>{plan.includes.map((item) => <li key={item}>✓ {item}</li>)}</ul><button className="plan-button">{plan.price === "₹0" ? "Current plan" : "Choose plan →"}</button></article>)}</div></section></main>;
+}
