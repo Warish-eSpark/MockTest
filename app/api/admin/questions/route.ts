@@ -1,5 +1,23 @@
-import { NextResponse } from "next/server";
-import { adminQuestions } from "../../../../lib/phase1";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "../../../../lib/admin-auth";
+import { recordAuditEvent } from "../../../../lib/audit";
+import { createQuestion, listQuestions } from "../../../../lib/admin-content";
 
-export function GET() { return NextResponse.json({ data: adminQuestions }); }
-export async function POST(request: Request) { const body = await request.json(); return NextResponse.json({ data: { id: `q-${Date.now()}`, ...body, status: "Draft", usedIn: [] } }, { status: 201 }); }
+export async function GET(request: NextRequest) {
+	const access = await requireAdmin(request);
+	if ("response" in access) return access.response;
+	return NextResponse.json({ data: await listQuestions() });
+}
+
+export async function POST(request: NextRequest) {
+	const access = await requireAdmin(request);
+	if ("response" in access) return access.response;
+	const body = await request.json();
+	try {
+		const question = await createQuestion(body);
+		await recordAuditEvent({ actorId: access.user.id, action: "question.create", entityType: "question", entityId: question.id, details: { exam: question.exam, subject: question.subject, status: question.status } });
+		return NextResponse.json({ data: question }, { status: 201 });
+	} catch (error) {
+		return NextResponse.json({ error: error instanceof Error ? error.message : "Unable to save question." }, { status: 400 });
+	}
+}

@@ -30,9 +30,11 @@ The attached requirements document was not available as a readable file in the w
 
 ## Backend foundation
 
-The first Phase 1 data boundary is now available at `/api/exams`. It reads published exams and their published test counts from MySQL, while falling back to launch fixtures when XAMPP has not been initialized. The schema is configuration-driven so adding an exam, edition, subject, topic, rule profile, test series, or entitlement does not require a code change.
+The first Phase 1 data boundary is now available at `/api/exams`. It reads published exams and their published test counts from MySQL, while falling back to launch fixtures when XAMPP has not been initialized. The schema is configuration-driven so adding an exam, edition, subject, topic, rule profile, test series, or entitlement does not require a code change. Authentication sessions and test attempts/results also use MySQL when the persistence tables exist; local in-memory fallback remains available for development without XAMPP.
 
-Initialize the local database from `database/schema.sql`, then load launch records from `database/seed.sql`.
+Initialize the local database from `database/schema.sql`, then load launch records from `database/seed.sql`. The schema preserves the original auto-increment user IDs and adds `user_sessions` and `test_attempts` tables. Re-importing the schema with phpMyAdmin creates missing tables without changing existing user IDs.
+
+Admin APIs and `/admin` require an administrator session. To create the first administrator, set a private `ADMIN_BOOTSTRAP_KEY` in `.env.local`, then POST `displayName`, `email`, and `password` to `/api/auth/bootstrap-admin` with that value in the `x-admin-bootstrap-key` header. The bootstrap endpoint is disabled when the key is unset and refuses creation after an administrator already exists. Admin question, rule, and test creation requests write audit events to `audit_logs`.
 
 ## Run locally
 

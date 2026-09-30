@@ -1,5 +1,23 @@
-import { NextResponse } from "next/server";
-import { ruleProfiles } from "../../../../lib/phase1";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "../../../../lib/admin-auth";
+import { createRuleProfile, listRuleProfiles } from "../../../../lib/admin-content";
+import { recordAuditEvent } from "../../../../lib/audit";
 
-export function GET() { return NextResponse.json({ data: ruleProfiles }); }
-export async function POST(request: Request) { const body = await request.json(); return NextResponse.json({ data: { id: `rule-${Date.now()}`, version: 1, status: "Draft", ...body } }, { status: 201 }); }
+export async function GET(request: NextRequest) {
+	const access = await requireAdmin(request);
+	if ("response" in access) return access.response;
+	return NextResponse.json({ data: await listRuleProfiles() });
+}
+
+export async function POST(request: NextRequest) {
+	const access = await requireAdmin(request);
+	if ("response" in access) return access.response;
+	const body = await request.json();
+	try {
+		const rule = await createRuleProfile(body);
+		await recordAuditEvent({ actorId: access.user.id, action: "rule.create", entityType: "rule_profile", entityId: rule.id, details: { exam: rule.exam, version: rule.version, status: rule.status } });
+		return NextResponse.json({ data: rule }, { status: 201 });
+	} catch (error) {
+		return NextResponse.json({ error: error instanceof Error ? error.message : "Unable to save rule profile." }, { status: 400 });
+	}
+}

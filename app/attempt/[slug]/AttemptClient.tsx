@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import type { AttemptQuestion } from "../../../lib/attempts";
 
-type AttemptClientProps = { title: string; exam: string; durationSeconds: number; questions: AttemptQuestion[] };
+type AttemptClientProps = { title: string; exam: string; durationSeconds: number; questions: AttemptQuestion[]; testSlug: string };
 
 type ResponseState = "unanswered" | "answered" | "review" | "answered-review";
 
-export default function AttemptClient({ title, exam, durationSeconds, questions }: AttemptClientProps) {
+export default function AttemptClient({ title, exam, durationSeconds, questions, testSlug }: AttemptClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [remainingSeconds, setRemainingSeconds] = useState(durationSeconds);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -29,10 +29,10 @@ export default function AttemptClient({ title, exam, durationSeconds, questions 
   };
 
   useEffect(() => {
-    void fetch("/api/attempts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testSlug: "bpsc-tre-4-general-studies" }) })
+    void fetch("/api/attempts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testSlug }) })
       .then((response) => response.json())
       .then((payload) => setAttemptId(payload.data?.id ?? null));
-  }, []);
+  }, [testSlug]);
 
   useEffect(() => {
     if (submitted || remainingSeconds <= 0) return;
@@ -41,8 +41,8 @@ export default function AttemptClient({ title, exam, durationSeconds, questions 
   }, [remainingSeconds, submitted]);
 
   useEffect(() => {
-    if (remainingSeconds === 0) setSubmitted(true);
-  }, [remainingSeconds]);
+    if (remainingSeconds === 0 && attemptId) void fetch(`/api/attempts/${attemptId}/submit`, { method: "POST" }).then(() => { window.location.href = `/results/${attemptId}`; });
+  }, [remainingSeconds, attemptId]);
 
   const saveResponseToServer = (optionIndex: number | null, markForReview?: boolean) => { if (attemptId) void fetch(`/api/attempts/${attemptId}/responses`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionId: currentQuestion.id, optionIndex, markForReview }) }); };
   const selectAnswer = (optionIndex: number) => { setAnswers((current) => ({ ...current, [currentQuestion.id]: optionIndex })); saveResponseToServer(optionIndex); };

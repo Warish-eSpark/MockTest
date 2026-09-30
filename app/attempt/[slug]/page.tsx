@@ -6,5 +6,5 @@ export default async function AttemptPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const test = attemptFixtures[slug];
   if (!test) notFound();
-  return <AttemptClient {...test} />;
+  return <AttemptClient {...test} testSlug={slug} />;
 }

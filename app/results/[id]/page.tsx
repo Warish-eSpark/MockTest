@@ -4,7 +4,7 @@ import { getAttemptResult } from "../../../lib/attempt-store";
 
 export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const stored = getAttemptResult(id);
+  const stored = await getAttemptResult(id);
   if (!stored) notFound();
   const { attempt, result } = stored;
   const accuracy = Math.round((result.correct / result.maxScore) * 100);

@@ -14,6 +14,7 @@ export const db =
     database: process.env.DB_NAME ?? "mock_test_platform",
     waitForConnections: true,
     connectionLimit: 10,
+    connectTimeout: 1500,
   });
 
 if (process.env.NODE_ENV !== "production") globalForDb.mockTestPool = db;
