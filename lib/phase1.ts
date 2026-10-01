@@ -1,15 +1,78 @@
 export type ContentStatus = "Draft" | "In review" | "Approved" | "Published" | "Archived";
 
-export type AdminQuestion = { id: string; exam: string; subject: string; topic: string; stem: string; status: ContentStatus; usedIn: string[] };
+export type QuestionOption = { key: string; text: string; correct: boolean };
+
+export type AdminQuestion = {
+  id: string;
+  exam: string;
+  subject: string;
+  topic: string;
+  stem: string;
+  explanation?: string;
+  difficulty?: "easy" | "medium" | "hard";
+  status: ContentStatus;
+  options?: QuestionOption[];
+  usedIn: string[];
+};
 export type RuleProfile = { id: string; exam: string; version: number; options: number; correctMarks: string; wrongMarks: string; unansweredMarks: string; status: ContentStatus; source: string };
 export type AdminTest = { id: string; name: string; exam: string; type: string; questions: number; duration: string; access: "Free" | "Premium"; status: ContentStatus };
 export type Plan = { id: string; name: string; description: string; price: string; validity: string; badge?: string; includes: string[] };
 export type Notification = { id: string; title: string; organization: string; category: string; date: string; status: "Open" | "Closing soon" | "Announced"; summary: string; examSlug: string };
 
 export const adminQuestions: AdminQuestion[] = [
-  { id: "q-001", exam: "BPSC TRE 4.0", subject: "General Studies", topic: "Bihar Geography", stem: "Which river is known as the Sorrow of Bihar?", status: "Published", usedIn: ["General Studies: Full Mock 01"] },
-  { id: "q-002", exam: "Bihar STET", subject: "Teaching Art", topic: "Assessment & Evaluation", stem: "Which assessment is conducted during instruction to improve learning?", status: "In review", usedIn: [] },
-  { id: "q-003", exam: "BPSC TRE 4.0", subject: "Mathematics", topic: "Percentage", stem: "If a number rises by 20% and falls by 20%, what is the net change?", status: "Draft", usedIn: [] },
+  {
+    id: "q-001",
+    exam: "BPSC TRE 4.0",
+    subject: "General Studies",
+    topic: "Bihar Geography",
+    stem: "Which river is known as the Sorrow of Bihar?",
+    explanation: "The Kosi River is known as the Sorrow of Bihar because its recurring annual floods cause severe devastation in northern Bihar.",
+    difficulty: "easy",
+    status: "Published",
+    options: [
+      { key: "A", text: "Ganga", correct: false },
+      { key: "B", text: "Kosi", correct: true },
+      { key: "C", text: "Son", correct: false },
+      { key: "D", text: "Gandak", correct: false },
+      { key: "E", text: "None of the above / More than one of the above", correct: false }
+    ],
+    usedIn: ["General Studies: Full Mock 01"]
+  },
+  {
+    id: "q-002",
+    exam: "Bihar STET",
+    subject: "Teaching Art",
+    topic: "Assessment & Evaluation",
+    stem: "Which assessment is conducted during instruction to improve learning?",
+    explanation: "Formative assessment is continuous diagnostic assessment during instruction that provides immediate feedback to students and teachers.",
+    difficulty: "medium",
+    status: "In review",
+    options: [
+      { key: "A", text: "Summative assessment", correct: false },
+      { key: "B", text: "Formative assessment", correct: true },
+      { key: "C", text: "Diagnostic assessment", correct: false },
+      { key: "D", text: "Norm-referenced assessment", correct: false }
+    ],
+    usedIn: []
+  },
+  {
+    id: "q-003",
+    exam: "BPSC TRE 4.0",
+    subject: "Mathematics",
+    topic: "Percentage",
+    stem: "If a number rises by 20% and then falls by 20%, what is the net percentage change?",
+    explanation: "Net change = +20 - 20 - (20 * 20)/100 = -4% (a 4% decrease).",
+    difficulty: "medium",
+    status: "Draft",
+    options: [
+      { key: "A", text: "No change", correct: false },
+      { key: "B", text: "4% decrease", correct: true },
+      { key: "C", text: "4% increase", correct: false },
+      { key: "D", text: "2% decrease", correct: false },
+      { key: "E", text: "None of the above / More than one of the above", correct: false }
+    ],
+    usedIn: []
+  },
 ];
 
 export const ruleProfiles: RuleProfile[] = [

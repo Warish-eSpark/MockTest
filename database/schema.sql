@@ -118,17 +118,37 @@ CREATE TABLE IF NOT EXISTS test_series (
 
 CREATE TABLE IF NOT EXISTS tests (
   id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  test_series_id BIGINT UNSIGNED NOT NULL,
-  rule_profile_id BIGINT UNSIGNED NOT NULL,
+  test_series_id BIGINT UNSIGNED NULL,
+  rule_profile_id BIGINT UNSIGNED NULL,
+  exam_id BIGINT UNSIGNED NULL,
+  subject_id BIGINT UNSIGNED NULL,
+  track_slug VARCHAR(100) NULL,
   name VARCHAR(180) NOT NULL,
-  test_type ENUM('full', 'section', 'subject', 'topic', 'mini', 'pyq', 'live') NOT NULL,
+  slug VARCHAR(200) UNIQUE NULL,
+  test_type ENUM('full', 'section', 'subject', 'topic', 'mini', 'pyq', 'live') NOT NULL DEFAULT 'full',
   question_count INT UNSIGNED NOT NULL DEFAULT 0,
   duration_minutes INT UNSIGNED NOT NULL DEFAULT 0,
   total_marks DECIMAL(8,3) NOT NULL DEFAULT 0,
+  access_type ENUM('free', 'premium') NOT NULL DEFAULT 'free',
+  description TEXT NULL,
   status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
   FOREIGN KEY (test_series_id) REFERENCES test_series(id),
   FOREIGN KEY (rule_profile_id) REFERENCES rule_profiles(id),
-  INDEX idx_tests_catalog (test_series_id, status, test_type)
+  FOREIGN KEY (exam_id) REFERENCES exams(id),
+  FOREIGN KEY (subject_id) REFERENCES subjects(id),
+  INDEX idx_tests_catalog (status, test_type),
+  INDEX idx_tests_exam_subject (exam_id, subject_id, track_slug)
+);
+
+CREATE TABLE IF NOT EXISTS test_requests (
+  id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  exam_slug VARCHAR(100) NOT NULL,
+  track_slug VARCHAR(100) NOT NULL,
+  subject_name VARCHAR(180) NOT NULL,
+  request_count INT UNSIGNED NOT NULL DEFAULT 1,
+  last_requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_exam_subject_request (exam_slug, track_slug, subject_name)
 );
 
 CREATE TABLE IF NOT EXISTS questions (
@@ -138,6 +158,7 @@ CREATE TABLE IF NOT EXISTS questions (
   stem TEXT NOT NULL,
   explanation TEXT NULL,
   status ENUM('draft', 'in_review', 'approved', 'published', 'archived') NOT NULL DEFAULT 'draft',
+  difficulty VARCHAR(20) NOT NULL DEFAULT 'medium',
   version INT NOT NULL DEFAULT 1,
   FOREIGN KEY (subject_id) REFERENCES subjects(id),
   FOREIGN KEY (topic_id) REFERENCES topics(id),

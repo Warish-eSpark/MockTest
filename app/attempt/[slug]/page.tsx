@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import AttemptClient from "./AttemptClient";
-import { attemptFixtures } from "../../../lib/attempts";
+import { getTestAttemptDefinition } from "../../../lib/attempt-store";
 
 export default async function AttemptPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const test = attemptFixtures[slug];
+  const test = await getTestAttemptDefinition(slug);
   if (!test) notFound();
   return <AttemptClient {...test} testSlug={slug} />;
 }
